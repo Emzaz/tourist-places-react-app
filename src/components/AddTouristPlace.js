@@ -1,21 +1,35 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Form, FormGroup, FormControl, Col, ControlLabel, Button } from "react-bootstrap";
-import { GlobalContext } from "../context/GlobalState";
 import { Link, useHistory } from "react-router-dom";
 import './AddTouristPlace.css';
 import { v4 as uuidv4 } from 'uuid';
-import { placeSchema } from "../Validations/TouristFormValidation";
-// import update from 'immutability-helper'
+import { placeSchema } from "../Validation Schemas/TouristFormValidation";
+import { useDispatch } from "react-redux";
+import { addPlace } from "../actions/actions";
 
 const AddTouristPlace = () => {
     let history = useHistory();
-    const { addPlace } = useContext(GlobalContext);
+    const dispatch = useDispatch();
+
+    const onAddPlace = (place) => {
+        dispatch(addPlace(place));    
+    }
 
     const[name, setName] = useState('');
     const[address, setAddress] = useState('');
     const[rating, setRating] = useState('');
-    const[type, setType] = useState('Beach');
+    const[type, setType] = useState('');
     const[picture, setPicture] = useState('');
+
+    const[fieldErrors, setFieldErrors] = useState();
+
+    const handleReset = () => {
+        setName('')
+        setAddress('')
+        setRating('')
+        setType('')
+        setPicture('')
+    }
 
     const onFormSubmit = async (e) => {
         e.preventDefault();
@@ -27,10 +41,11 @@ const AddTouristPlace = () => {
             type: type,
             picture,
         };
+
         const isValid = await placeSchema.isValid(newPlace);
-        console.log(isValid);
+
         if (isValid) {
-            addPlace(newPlace);
+            onAddPlace(newPlace);
             history.push("/");
         } else {
             placeSchema.validate(newPlace, { abortEarly: false }).catch((err) => {
@@ -40,16 +55,9 @@ const AddTouristPlace = () => {
                         [error.path] : true,
                     }
                 }, {})
-
-                console.log(errors.name);
-                // setErrors((prevErrors) => update(prevErrors, {
-                //     $set: errors,
-                // })
-                // )
+                setFieldErrors(errors);
             })
         }
-
-        // console.log(errors)
     };
 
     const addPicture = (e) => {
@@ -83,7 +91,11 @@ const AddTouristPlace = () => {
                 onChange={e => setName(e.target.value)}
                 // required
                 />
+                {fieldErrors?.name === true ? 
+                    <small>Name is Required</small> : null
+                }
                 </Col>
+                
             </FormGroup>
 
             <FormGroup controlId="formHorizontalAddress">
@@ -99,6 +111,9 @@ const AddTouristPlace = () => {
                 onChange={e => setAddress(e.target.value)} 
                 // required
                 />
+                {fieldErrors?.address === true ? 
+                    <small>Address is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -111,11 +126,14 @@ const AddTouristPlace = () => {
                 value={rating} 
                 name='rating' 
                 type="number" 
-                // min={1} max={5} 
+                // min={1} max={5}
                 placeholder="Rate the palace from 1 to 5" 
                 onChange={e => setRating(e.target.value)} 
                 // required
                 />
+                {fieldErrors?.rating === true ? 
+                    <small>Rating is Required and must be between 1 to 5</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -131,11 +149,15 @@ const AddTouristPlace = () => {
                 onChange={e => setType(e.target.value)}
                 // required
                 > 
-                    <option>Beach</option>
-                    <option>Hills</option>
-                    <option>Fountain</option>
-                    <option>Lndmark</option>
+                    <option disabled selected value="">-- Select a Type --</option>
+                    <option value="Beach">Beach</option>
+                    <option value="Hills">Hills</option>
+                    <option value="Fountain">Fountain</option>
+                    <option value="Lndmark">Lndmark</option>
                 </FormControl>
+                {fieldErrors?.type === true ? 
+                    <small>Type is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -151,13 +173,16 @@ const AddTouristPlace = () => {
                 onChange={addPicture}
                 // required
                 />
+                {fieldErrors?.picture === true ? 
+                    <small>Picture Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
             <FormGroup className="button">
                 <Col smOffset={10} sm={2}>
                 <Button bsStyle="success" className="btn-submit" type="submit">Submit</Button>
-                <Button bsStyle="warning" className="btn-reset" type="reset">Reset</Button>
+                <Button bsStyle="warning" className="btn-reset" onClick={handleReset}>Reset</Button>
                 </Col>
             </FormGroup>
             </Form>

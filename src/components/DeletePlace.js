@@ -1,12 +1,17 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Button, Modal } from "react-bootstrap";
+import { useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { GlobalContext } from "../context/GlobalState";
+import { removePlace } from "../actions/actions";
 
 const DeletePlace = () => {
-    const { removePlace } = useContext(GlobalContext);
+    const dispatch = useDispatch();
+    
+    const  onRemovePlace  = (id) => {
+        dispatch(removePlace(id))
+    }
+
     const {id} = useParams();
-    console.log(id);
 
     return (
         <div className="static-modal">
@@ -19,7 +24,7 @@ const DeletePlace = () => {
                         <Button bsStyle="warning primary">
                             Cancel
                         </Button>
-                        <Button onClick={() => removePlace(id)} bsStyle="danger primary">
+                        <Button onClick={() => onRemovePlace(id)} bsStyle="danger primary">
                             Delete
                         </Button>
                     </Link>

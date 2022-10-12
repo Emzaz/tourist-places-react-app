@@ -1,15 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, FormGroup, FormControl, Col, ControlLabel, Button } from "react-bootstrap";
-import { GlobalContext } from "../context/GlobalState";
 import { Link, useHistory } from "react-router-dom";
 import './AddTouristPlace.css';
-import { placeSchema } from "../Validations/TouristFormValidation";
+import { placeSchema } from "../Validation Schemas/TouristFormValidation";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePlace } from "../actions/actions";
 
 const UpdateTouristPlace = (route) => {
     let history = useHistory();
-    const { places, updatePlace } = useContext(GlobalContext);
-    const[picture, setPicture] = useState('');
+    const places = useSelector(state => state.places);
+    const dispatch = useDispatch();
+    
+    const onUpdatePlace = (updatedPlace) => dispatch(updatePlace(updatedPlace));
 
+    const[picture, setPicture] = useState('');
+    const[fieldErrors, setFieldErrors] = useState();
     const [selectedPlace, setSelectedPlace] = useState({
         id: null,
         name: '',
@@ -18,7 +23,7 @@ const UpdateTouristPlace = (route) => {
         type: '',
         picture: '',
     });
-    
+
     const currentPlaceId = route.match.params.id;
 
     useEffect(() => {
@@ -27,20 +32,38 @@ const UpdateTouristPlace = (route) => {
         setSelectedPlace(selectedPlace);
     }, [currentPlaceId, places]);
 
+    const handleReset = () => {
+        const placeId = currentPlaceId;
+        const selectedPlace = places.find((currentPlaceTraversal) => currentPlaceTraversal.id === placeId);
+        setSelectedPlace(selectedPlace);
+    }
+
     const onFormSubmit = async (e) => {
         e.preventDefault();
         selectedPlace.picture = picture;
         const isValid = await placeSchema.isValid(selectedPlace);
+
         if (isValid) {
-            updatePlace(selectedPlace);
+            onUpdatePlace(selectedPlace);
             history.push("/");   
+        } else {
+            placeSchema.validate(selectedPlace, { abortEarly: false }).catch((err) => {
+                const errors = err.inner.reduce((acc, error) => {
+                    return {
+                        ...acc,
+                        [error.path] : true,
+                    }
+                }, {})
+
+                setFieldErrors(errors);
+            })
         }
     };
 
     const handleOnChange = (placeKey, newValue) => setSelectedPlace({ ...selectedPlace, [placeKey]: newValue});
 
     if(!selectedPlace || !selectedPlace.id) {
-        return <div>Invalid Place Id</div>;
+        return <div><h1>Invalid Place Id</h1></div>;
     }
 
     const addPicture = (e) => {
@@ -56,7 +79,7 @@ const UpdateTouristPlace = (route) => {
     return (
         <div className="container">
             <div className="heading">
-                <h3>Add a new Tourist Place</h3>
+                <h3>Update the Place</h3>
             </div>
 
             <Form horizontal 
@@ -74,8 +97,11 @@ const UpdateTouristPlace = (route) => {
                 type="text" 
                 placeholder="Place Name" 
                 onChange={e => handleOnChange('name', e.target.value)}
-                required
+                // required
                 />
+                {fieldErrors?.name === true ? 
+                    <small>Name is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -90,8 +116,11 @@ const UpdateTouristPlace = (route) => {
                 type="text" 
                 placeholder="Address of the place" 
                 onChange={e => handleOnChange('address', e.target.value)} 
-                required
+                // required
                 />
+                {fieldErrors?.address === true ? 
+                    <small>Address is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -107,8 +136,11 @@ const UpdateTouristPlace = (route) => {
                 min={1} max={5} 
                 placeholder="Rate the palace from 1 to 5" 
                 onChange={e => handleOnChange('rating', e.target.value)} 
-                required
+                // required
                 />
+                {fieldErrors?.rating === true ? 
+                    <small>Rating is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -122,13 +154,17 @@ const UpdateTouristPlace = (route) => {
                 name='type' 
                 componentClass="select" 
                 onChange={e => handleOnChange('type', e.target.value)}
-                required
+                // required
                 > 
-                    <option>Beach</option>
-                    <option>Hills</option>
-                    <option>Fountain</option>
-                    <option>Lndmark</option>
+                    <option disabled selected value="">-- Select a Type --</option>
+                    <option value="Beach">Beach</option>
+                    <option value="Hills">Hills</option>
+                    <option value="Fountain">Fountain</option>
+                    <option value="Lndmark">Lndmark</option>
                 </FormControl>
+                {fieldErrors?.type === true ? 
+                    <small>Type is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
@@ -138,19 +174,21 @@ const UpdateTouristPlace = (route) => {
                 </Col>
                 <Col sm={10}>
                 <FormControl className="form-control"
-                //value={picture} 
                 name='picture' 
                 type="file" 
                 onChange={addPicture}
-                required
+                // required
                 />
+                {fieldErrors?.picture === true ? 
+                    <small>Picture is Required</small> : null
+                }
                 </Col>
             </FormGroup>
 
             <FormGroup className="button">
                 <Col smOffset={10} sm={2}>
                 <Button bsStyle="success" className="btn-submit" type="submit">Submit</Button>
-                <Button bsStyle="warning" className="btn-reset" type="reset">Reset</Button>
+                <Button bsStyle="warning" className="btn-reset" onClick={handleReset}>Reset</Button>
                 </Col>
             </FormGroup>
             </Form>
