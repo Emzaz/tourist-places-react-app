@@ -50,3 +50,7 @@
     margin-bottom: 1rem;
     width: 50%;
   }
+
+.rating-column {
+  cursor: pointer;
+}

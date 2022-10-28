@@ -1,11 +1,9 @@
 import React from 'react';
-import './App.css';
 import TouristPlaces from './components/TouristPlaces';
 import {
   Route,
   Switch
 } from "react-router-dom";
-
 import AddTouristPlace from './components/AddTouristPlace';
 import UpdateTouristPlace from './components/UpdateTouristPlace';
 import DeletePlace from './components/DeletePlace';
@@ -15,7 +13,6 @@ import store from './store'
 function App() {
 
   return (
-
     <Provider store={store}>
       <div className='App'>
         <Switch>

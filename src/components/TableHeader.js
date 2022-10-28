@@ -9,7 +9,7 @@ const TableHeader = ({ handleSorting , sortOrder}) => {
             <tr>
                 <th>NAME</th>
                 <th>ADDRESS</th>
-                <th onClick={handleSorting}>
+                <th className="rating-column" onClick={handleSorting}>
                     RATING
                     {sortOrder === 'none' ? <FaSort />: null}
                     {sortOrder === 'asc' ? <FaSortUp />: null}

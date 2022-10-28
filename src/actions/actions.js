@@ -1,6 +1,5 @@
 import { FETCH_PLACES, ADD_PLACE, UPDATE_PLACE, REMOVE_PLACE } from "./types";
 
-
 export const fetchPlaces = () => dispatch => {
   dispatch({
     type: FETCH_PLACES,

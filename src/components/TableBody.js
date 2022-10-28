@@ -1,7 +1,6 @@
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-
 const TableBody = ({places}) => {
     if (places.length > 0) {
         return (
