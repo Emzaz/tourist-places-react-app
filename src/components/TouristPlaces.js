@@ -1,69 +1,62 @@
-import React, { useState, useEffect } from "react";
-import { FormControl, Table } from "react-bootstrap";
-import { Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import './TouristPlaces.css'
+import { FormControl, Table, Button } from "react-bootstrap";
+
 import TableHeader from "./TableHeader";
 import TableBody from "./TableBody";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchPlaces } from '../actions/actions';
+import "./TouristPlaces.css";
 
 const TouristPlaces = () => {
-    const dispatch = useDispatch();
+  const [searchedName, setSearchedName] = useState("");
+  const [sortOrder, setSortOrder] = useState("none");
+  const places = useSelector((state) => state.places);
 
-    const [searchedName, setSearchedName] = useState('');
-    const [sortOrder, setSortOrder] = useState('none');
+  const handleSorting = () => {
+    let order = "";
 
-    const places = useSelector(state => state.places);
-    console.log(places);
-
-    useEffect(() => {
-        dispatch(fetchPlaces());
-    });
-
-    const handleSorting = () => {
-        let order = '';
-
-        if (sortOrder === 'asc') {
-            order = 'desc';
-        } else if (sortOrder === 'desc') {
-            order = 'none';
-        } else if (sortOrder === 'none') {
-            order = 'asc';
-        }
-        setSortOrder(order);
+    if (sortOrder === "asc") {
+      order = "desc";
+    } else if (sortOrder === "desc") {
+      order = "none";
+    } else if (sortOrder === "none") {
+      order = "asc";
     }
+    setSortOrder(order);
+  };
 
-    let data = places.filter((place) => place.name.toLowerCase().includes(searchedName));
+  let data = places.filter((place) =>
+    place.name.toLowerCase().includes(searchedName)
+  );
 
-    if (sortOrder === 'asc') {
-        data.sort((a, b) => a.rating - b.rating)
-    } else if (sortOrder === 'desc') {
-        data.sort((a, b) => b.rating - a.rating)
-    }
+  if (sortOrder === "asc") {
+    data.sort((a, b) => a.rating - b.rating);
+  } else if (sortOrder === "desc") {
+    data.sort((a, b) => b.rating - a.rating);
+  }
 
-    return (
+  return (
+    <div className="table-container">
+      <div className="table-search">
+        <FormControl
+          type="search"
+          value={searchedName}
+          id="datatable-search-input"
+          placeholder="Enter name to search"
+          onChange={(e) => setSearchedName(e.target.value.toLowerCase())}
+        />
+      </div>
 
-        <div className="table-container">
-            <div className="table-search">
-                <FormControl
-                    type="search"
-                    value={searchedName}
-                    id="datatable-search-input"
-                    placeholder="Enter name to search"
-                    onChange={(e) => setSearchedName(e.target.value.toLowerCase())} />
-            </div>
+      <Table responsive striped>
+        <TableHeader handleSorting={handleSorting} sortOrder={sortOrder} />
+        <TableBody places={data} />
+      </Table>
 
-            <Table responsive striped>
-                <TableHeader handleSorting={handleSorting} sortOrder={sortOrder} />
-                <TableBody places={data} />
-            </Table>
-
-            <Link to="/add">
-                <Button bsStyle="primary">Create New Tourist Place</Button>
-            </Link>
-        </div>
-    )
-}
+      <Link to="/add">
+        <Button bsStyle="primary">Create New Tourist Place</Button>
+      </Link>
+    </div>
+  );
+};
 
 export default TouristPlaces;
